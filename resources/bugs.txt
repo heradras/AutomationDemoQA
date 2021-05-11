@@ -1,0 +1,5 @@
+1:   bug: El footer molesta a la hora de clickear ciertos elementos
+    Solucion: Scrollear hasta localizar el elemento en pantalla
+
+2:  bug: en https://demoqa.com/text-box, id "currentAddress" duplicada
+    Solucion: Localizar el primer elemento con id "currentAddress" mediante el id y el segundo por xPath
