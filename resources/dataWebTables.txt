@@ -1,0 +1,20 @@
+joaquin,grassi,joaquin@example.com,28,10000,QA Automation
+german,oviedo,oviedo@example.com,35,12500,Testing
+jorge,pascual,jopa@example.com,25,5900,Security
+emanuel,romero,ema@example.com,27,7200,DEV
+maria,gutierrez,magutierrez@example.com,24,10000,QA Automation
+david, hernandez,daveid@example.com,36,10000,Compliance
+josefina,luca,joseLuca@example.com,32,7200,Dev
+ana,lucero,aniluc@example.com,8500,34,Insurance
+franco,perez,fran@example.com,10000,26,QA Manual
+felipe,caruzo,feliCaru@example.com,7800,26,QA Manual
+rodolfo,suarez,rodolfo@example.com,8000,35,Insurance
+andrea,lopez,anlop@example.com,9000,27,DEV
+luis,heisenberg,heisenmberg@example.com,7800,28,Security
+gerardo,martinez,geraMartinez@example.com,9500,30,QA Automation
+matias,gonzalez,matigo@example.com,10000,26,QA Automation
+bernardo,calderon,berna@example.com,12500,27,Legal
+liliana,jara,liliJara@example.com,8000,30,Compliance
+alberto,astud,astudAlber@example.com,9600,32,QA Manual
+mauricio,mantaras,mauman@example.com,7400,33,Security
+jose,iñaki,joseIniaki@example.com,8500,28,DEV

@@ -31,7 +31,7 @@ public class RadioButtonTests extends BaseTest {
         MenuPage menuPage = homePage.clickInElementsCard();
         RadioButtonPage radioButtonPage = new DropDownElementsPage(driver).clickInRadioButton();
         radioButtonPage.clickYesOption();
-        assertEquals( true  ,   radioButtonPage.getOptionState(driver.findElement(radioButtonPage.getYesOption())) );
+        assertEquals( true,radioButtonPage.getOptionState(driver.findElement(radioButtonPage.getYesOption())) );
         assertEquals("Yes",radioButtonPage.getTextSuccess());
     }
 

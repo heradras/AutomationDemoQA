@@ -11,8 +11,8 @@ public class RadioButtonPage {
     private By impressiveOption=By.id("impressiveRadio");
     private By noOption=By.id("noRadio");
 
-    private By clickeableYesOption = By.xpath("//*[@id=\"yesRadio\"]/..");
-    private By clickeableImpressiveOption =By.xpath("//*[@id=\"impressiveRadio\"]/..");
+    private By clickeableYesOption = By.xpath("//*[@id=\"yesRadio\"]/../label"); //Xpath necesario para correr en chrome y en firefox
+    private By clickeableImpressiveOption =By.xpath("//*[@id=\"impressiveRadio\"]/../label"); //Xpath necesario para correr en chrome y en firefox
     private By clickeableNoOption = By.xpath("//*[@id=\"noRadio\"]/..");
     private By textSuccess = By.xpath("//*[@class=\"text-success\"]");
 
