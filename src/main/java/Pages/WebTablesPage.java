@@ -17,6 +17,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.columns.FIRSTNAME;
+
 public class WebTablesPage {
     private WebDriver driver;
 
@@ -95,25 +97,35 @@ public class WebTablesPage {
         return addButton;
     }
 
-    public boolean checkRedFrame(columns col){
 
+
+
+    public WebElement getBox(columns col){
         WebElement box=null;
         switch (col){
             case FIRSTNAME: box=driver.findElement(firstNameBox);
-                            break;
+                break;
             case LASTNAME:  box=driver.findElement(lastNameBox);
-                            break;
+                break;
             case EMAIL:     box=driver.findElement(emailBox);
-                            break;
+                break;
             case AGE:       box=driver.findElement(ageBox);
-                            break;
+                break;
             case SALARY:    box=driver.findElement(salaryBox);
-                            break;
+                break;
             case DEPARTMENT:box=driver.findElement(departmentBox);
-                            break;
+                break;
             default:        break;
 
         }
+        return box;
+    }
+
+
+    public boolean checkRedFrame(columns col){
+
+        WebElement box = getBox(col);
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -151,6 +163,8 @@ public class WebTablesPage {
 
     }
 
+
+
     /**
      * Pone a addbuton en el area visible y lo clickea, Esoera a que se cargue el departmentBox,
      * el cual es el ultimo elemento en cargar de todos los campos rellenables.
@@ -166,34 +180,20 @@ public class WebTablesPage {
 
 
     public void manualInputGenerator(String firstName,String lastName,String age,String email,String salary,String department){
-        domController.scrollToItem(driver,driver.findElement(addButton));
-        driver.findElement(addButton).click();
-        WebDriverWait wait = new WebDriverWait(driver,5);
-        wait.until(ExpectedConditions.elementToBeClickable(firstNameBox));
+
+
         writeInFirstName(firstName);
+
         writeInLastName(lastName);
+
         writeInAge(age);
+
         writeInEmail(email);
+
         writeInSalary(salary);
+
         writeInDepartment(department);
 
-        driver.findElement(submitButton).click();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void clickAddButtonAndWaitFormLoad(){
-        domController.scrollToItem(driver,driver.findElement(addButton));
-        driver.findElement(addButton).click();
-        WebDriverWait wait = new WebDriverWait(driver,5);
-        wait.until(ExpectedConditions.elementToBeClickable(firstNameBox));
-    }
-
-    public void clickCloseButton(){
-        driver.findElement(closeButton).click();
     }
 
     public void manualInputGenerator(String firstName,String lastName,String age,String email,String salary,String department,int index,String text){
@@ -215,48 +215,135 @@ public class WebTablesPage {
         writeInEmail(data.get(3));
         writeInSalary(data.get(4));
         writeInDepartment(data.get(5));
-        clickInSubmitButton();
 
+
+    }
+
+    public void clickInSubmitAndWait(int waitMilliSeconds){
+        driver.findElement(submitButton).click();
+        try {
+            Thread.sleep(waitMilliSeconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void clickAddButtonAndWaitFormLoad(){
+        domController.scrollToItem(driver,driver.findElement(addButton));
+        driver.findElement(addButton).click();
+        WebDriverWait wait = new WebDriverWait(driver,5);
+        wait.until(ExpectedConditions.elementToBeClickable(departmentBox));
+    }
+
+    public void clickCloseButton(){
+        driver.findElement(closeButton).click();
+    }
+
+    public void eraseRow(WebElement row){
+        row.findElement(By.xpath("/.//*[@class=\"action-buttons\"]/*[@title=\"Delete\"]/*/*")).click();
+    }
+
+    public void eraseAllRows(){
+        refreshRowsList();
+        int rows = getCompleteRowsList().size();
+        for(int i =0;i<rows;i++){
+            eraseRow(getRowsList().get(0));
+        }
+    }
+
+    public List<WebElement> getCompleteRowsList(){
+        refreshRowsList();
+        ArrayList<WebElement> list= new ArrayList<>();
+        for(WebElement e:getRowsList()){
+            if(!getCellText(e, FIRSTNAME).equals(" ")){
+                list.add(e);
+            }
+        }
+        return list;
     }
 
     public void eraseAllBoxes(){
+
         driver.findElement(firstNameBox).clear();
+        driver.findElement(firstNameBox).sendKeys("");
         driver.findElement(lastNameBox).clear();
+        driver.findElement(lastNameBox).sendKeys("");
         driver.findElement(ageBox).clear();
+        driver.findElement(ageBox).sendKeys("");
         driver.findElement(emailBox).clear();
+        driver.findElement(emailBox).sendKeys("");
         driver.findElement(salaryBox).clear();
+        driver.findElement(salaryBox).sendKeys("");
         driver.findElement(departmentBox).clear();
+        driver.findElement(departmentBox).sendKeys("");
     }
 
-    public String getWritedBoxText(){
-        return driver.findElement(firstNameBox).getCssValue("value");
+    private void clickInTitle(){
+        driver.findElement(formTittle).click();
+    }
+
+    public String getWritedBoxText(WebElement box){
+        clickInTitle();
+        return box.getAttribute("value");
     }
 
     //public String getPyloadInFile(int column,int row,)
 
     public void writeInFirstName(String text){
+        driver.findElement(firstNameBox).clear();
         driver.findElement(firstNameBox).sendKeys(text);
     }
 
     public void writeInLastName(String text){
+        driver.findElement(lastNameBox).clear();
         driver.findElement(lastNameBox).sendKeys(text);
     }
 
     public void writeInAge(String text){
+        driver.findElement(ageBox).clear();
         driver.findElement(ageBox).sendKeys(text);
     }
 
     public void writeInEmail(String text){
+        driver.findElement(emailBox).clear();
         driver.findElement(emailBox).sendKeys(text);
     }
 
     public void writeInSalary(String text){
+        driver.findElement(salaryBox).clear();
         driver.findElement(salaryBox).sendKeys(text);
     }
 
     public void writeInDepartment(String text){
+        driver.findElement(departmentBox).clear();
         driver.findElement(departmentBox).sendKeys(text);
     }
+
+    public String getFirstNameInput(){
+        String text=driver.findElement(firstNameBox).getCssValue("value");
+        return text;
+    }
+
+    public String getLastNameInput(){
+        return driver.findElement(lastNameBox).getCssValue("value");
+    }
+
+    public String getAgeInput(){
+        return driver.findElement(ageBox).getCssValue("value");
+    }
+
+    public String getEmailInput(){
+        return driver.findElement(emailBox).getCssValue("value");
+    }
+
+    public String getSalaryInput(){
+        return driver.findElement(salaryBox).getCssValue("value");
+    }
+
+    public String getDepartmentInput(){
+        return driver.findElement(departmentBox).getCssValue("value");
+    }
+
 
     public void clickInSubmitButton(){
         driver.findElement(submitButton).click();
@@ -328,10 +415,10 @@ public class WebTablesPage {
     }
 
 
-    public ArrayList<String> cloneColumnElementsInList(int iRow,int cellIndex){
+    public ArrayList<String> cloneColumnElementsInList(int iRow,int cellIndex,String path){
 
         ArrayList<String> list=new ArrayList<>();
-        File file = new File("D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\incorrectInputsFirstName.xlsx");
+        File file = new File(path);
         InputStream inputStream = null;
         try {
             inputStream = new FileInputStream(file);
@@ -353,14 +440,13 @@ public class WebTablesPage {
             var cell = row.getCell(cellIndex);
             var value = cell.getStringCellValue();
 
-            System.out.println("Valor de la entrada es " + value);
-            System.out.println(cell.getCellType().toString());
+            //System.out.println("Valor de la entrada es " + value);
+            //System.out.println(cell.getCellType().toString());
             list.add(value);
             iRow++;
             row = sheet.getRow(iRow);
         }
-        System.out.println("Number of cells in column "+sheet.getRow(0).getCell(cellIndex)
-        +": "+list.size());
+
         return list;
     }
 
