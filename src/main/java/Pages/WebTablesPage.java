@@ -1,5 +1,9 @@
 package Pages;
 
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -9,12 +13,8 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import utils.columns;
 import utils.domController;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.lang.reflect.Array;
-import java.util.HashMap;
+import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WebTablesPage {
@@ -23,6 +23,8 @@ public class WebTablesPage {
     private By searchBox = By.id("searchBox");
     private By searchButton = By.id("basic-addon2");
     private By addButton = By.id("addNewRecordButton");
+    private By BoxesInForm = By.xpath("//*[@class=\"mt-2 row\"]");
+    private By formTittle = By.id("registration-form-modal");
 
     private By columns = By.xpath("//*[@class=\"rt-resizable-header-content\"]");
 
@@ -51,6 +53,9 @@ public class WebTablesPage {
     private By submitButton = By.id("submit");
     private By closeButton = By.xpath("//*[@type=\"button\"]/*[@aria-hidden=\"true\"]");
 
+    private ArrayList<String> incorrectInputs = new ArrayList<>();
+    private ArrayList<String> expectedOutputs = new ArrayList<>();
+
 
     public WebTablesPage(WebDriver driver){
         this.driver=driver;
@@ -69,16 +74,65 @@ public class WebTablesPage {
     public void clickInAddButton(){
         driver.findElement(addButton).click();
     }
+
+    public int getNumberOfBoxesInForm(){
+        int numberOfBoxesInForm;
+        do {
+            clickAddButtonAndWaitFormLoad();
+            numberOfBoxesInForm =driver.findElements(BoxesInForm).size();
+            clickCloseButton();
+            if(numberOfBoxesInForm<=0) System.out.println("getNumberOfBoxesInForm Error");
+        } while(numberOfBoxesInForm <=0);
+
+        return numberOfBoxesInForm;
+    }
+
+    public String getFormTittle(){
+        return driver.findElement(formTittle).getText();
+    }
+
     public By getAddButton(){
         return addButton;
     }
+
+    public boolean checkRedFrame(columns col){
+
+        WebElement box=null;
+        switch (col){
+            case FIRSTNAME: box=driver.findElement(firstNameBox);
+                            break;
+            case LASTNAME:  box=driver.findElement(lastNameBox);
+                            break;
+            case EMAIL:     box=driver.findElement(emailBox);
+                            break;
+            case AGE:       box=driver.findElement(ageBox);
+                            break;
+            case SALARY:    box=driver.findElement(salaryBox);
+                            break;
+            case DEPARTMENT:box=driver.findElement(departmentBox);
+                            break;
+            default:        break;
+
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(box.getCssValue("border-color"));
+        if(box.getCssValue("border-color").equals("rgb(220, 53, 69)")){
+            return true;
+        }
+        return false;
+    }
+
     public List<WebElement> getRowsList(){
         return rowsList;
     }
 
     public String getCellText(WebElement element,columns column){
-
-        return element.findElements(By.xpath(".//*[@class=\"rt-td\"]")).get(getColumnIndex(column)).getText();
+        String text=element.findElements(By.xpath(".//*[@class=\"rt-td\"]")).get(getColumnIndex(column)).getText();
+        return text;
     }
 
     public void refreshRowsList(){
@@ -97,20 +151,89 @@ public class WebTablesPage {
 
     }
 
+    /**
+     * Pone a addbuton en el area visible y lo clickea, Esoera a que se cargue el departmentBox,
+     * el cual es el ultimo elemento en cargar de todos los campos rellenables.
+     * Rellena los campos en funcion de los parametros, y clickea en el boton submit. Espera
+     * por sistema una cantidad de tiempo y termina su ejecucion.
+     * @param firstName firstNameBox content.
+     * @param lastName  lastNameBox content.
+     * @param age ageBox content.
+     * @param email emailBox content.
+     * @param salary salaryBox content.
+     * @param department departmentBox content.
+     */
+
 
     public void manualInputGenerator(String firstName,String lastName,String age,String email,String salary,String department){
         domController.scrollToItem(driver,driver.findElement(addButton));
         driver.findElement(addButton).click();
         WebDriverWait wait = new WebDriverWait(driver,5);
         wait.until(ExpectedConditions.elementToBeClickable(firstNameBox));
-        driver.findElement(firstNameBox).sendKeys(firstName);
-        driver.findElement(lastNameBox).sendKeys(lastName);
-        driver.findElement(emailBox).sendKeys(email);
-        driver.findElement(ageBox).sendKeys(age);
-        driver.findElement(salaryBox).sendKeys(salary);
-        driver.findElement(departmentBox).sendKeys(department);
+        writeInFirstName(firstName);
+        writeInLastName(lastName);
+        writeInAge(age);
+        writeInEmail(email);
+        writeInSalary(salary);
+        writeInDepartment(department);
+
         driver.findElement(submitButton).click();
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
+
+    public void clickAddButtonAndWaitFormLoad(){
+        domController.scrollToItem(driver,driver.findElement(addButton));
+        driver.findElement(addButton).click();
+        WebDriverWait wait = new WebDriverWait(driver,5);
+        wait.until(ExpectedConditions.elementToBeClickable(firstNameBox));
+    }
+
+    public void clickCloseButton(){
+        driver.findElement(closeButton).click();
+    }
+
+    public void manualInputGenerator(String firstName,String lastName,String age,String email,String salary,String department,int index,String text){
+
+        List<String> data = new ArrayList<String>();
+
+        data.add(firstName);
+        data.add(lastName);
+        data.add(age);
+        data.add(email);
+        data.add(salary);
+        data.add(department);
+
+        data.set(index,text);
+
+        writeInFirstName(data.get(0));
+        writeInLastName(data.get(1));
+        writeInAge(data.get(2));
+        writeInEmail(data.get(3));
+        writeInSalary(data.get(4));
+        writeInDepartment(data.get(5));
+        clickInSubmitButton();
+
+    }
+
+    public void eraseAllBoxes(){
+        driver.findElement(firstNameBox).clear();
+        driver.findElement(lastNameBox).clear();
+        driver.findElement(ageBox).clear();
+        driver.findElement(emailBox).clear();
+        driver.findElement(salaryBox).clear();
+        driver.findElement(departmentBox).clear();
+    }
+
+    public String getWritedBoxText(){
+        return driver.findElement(firstNameBox).getCssValue("value");
+    }
+
+    //public String getPyloadInFile(int column,int row,)
+
     public void writeInFirstName(String text){
         driver.findElement(firstNameBox).sendKeys(text);
     }
@@ -133,6 +256,10 @@ public class WebTablesPage {
 
     public void writeInDepartment(String text){
         driver.findElement(departmentBox).sendKeys(text);
+    }
+
+    public void clickInSubmitButton(){
+        driver.findElement(submitButton).click();
     }
 
     public void inputGenerator(int numberOfInputs) throws IOException {
@@ -199,4 +326,61 @@ public class WebTablesPage {
             default:            return -1;
         }
     }
+
+
+    public ArrayList<String> cloneColumnElementsInList(int iRow,int cellIndex){
+
+        ArrayList<String> list=new ArrayList<>();
+        File file = new File("D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\incorrectInputsFirstName.xlsx");
+        InputStream inputStream = null;
+        try {
+            inputStream = new FileInputStream(file);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        Workbook wb=null;
+        try {
+            wb = WorkbookFactory.create(inputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Sheet sheet = wb.getSheetAt(0);
+        Row row = sheet.getRow(iRow); //En qué fila empezar ya dependerá también de si tenemos, por ejemplo, el título de cada columna en la primera fila
+        while(row!=null)
+        {
+
+            var cell = row.getCell(cellIndex);
+            var value = cell.getStringCellValue();
+
+            System.out.println("Valor de la entrada es " + value);
+            System.out.println(cell.getCellType().toString());
+            list.add(value);
+            iRow++;
+            row = sheet.getRow(iRow);
+        }
+        System.out.println("Number of cells in column "+sheet.getRow(0).getCell(cellIndex)
+        +": "+list.size());
+        return list;
+    }
+
+
+
+
+
+    public static Object getFormatedCell(String text){
+        try {
+            return Integer.parseInt(text);
+
+        } catch (NumberFormatException nfe){
+            try{
+                return Boolean.parseBoolean(text);
+            }catch (NumberFormatException _nfe){
+                return text;
+            }
+
+        }
+    }
+
+
 }

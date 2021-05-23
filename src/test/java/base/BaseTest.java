@@ -22,7 +22,7 @@ public class BaseTest {
     void setUp(){
         //se setea la propiedad webdriver.chrome.driver, la cual es interpretada por selenium y
         //se setea el chromedriver.exe de la carpeta resources
-        driverManager= DriverManagerFactory.getManager(DriverType.FIREFOX);
+        driverManager= DriverManagerFactory.getManager(DriverType.CHROME);
         driver=driverManager.getDriver();
         driver.get("https://demoqa.com/");
         //driver.manage().window().maximize();

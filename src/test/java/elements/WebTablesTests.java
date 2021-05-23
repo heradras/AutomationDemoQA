@@ -3,23 +3,27 @@ package elements;
 import Pages.DropDownElementsPage;
 import Pages.MenuPage;
 import base.BaseTest;
+import org.apache.poi.ss.usermodel.*;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebElement;
 import utils.columns;
-import java.io.IOException;
-import java.util.Locale;
+
+import java.io.*;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static utils.columns.FIRSTNAME;
 
 /**
  * Pruebas:
- *  1 - Campo de busqueda:
- *      1.1 - El campo busqueda selecciona elementos de texto correspondiente en cualquier columna
- *      1.2 - Las busquedas se realizan caracter a caracter trayendo las coincidencias de todas las columnas
- *      1.3 - Los resultados no distinguen mayusculas de minusculas
- *  2 - El boton add abre el recuadro de introduccion de personal y agrega satisfactoriamente los datos
- *      2.1 - Todos los campos son obligatorios, se demuestra que se marca el marco en rojo si se omite uno
+ * X1 - Campo de busqueda:
+ *    X 1.1 - El campo busqueda selecciona elementos de texto correspondiente en cualquier columna
+ *    X 1.2 - Las busquedas se realizan caracter a caracter trayendo las coincidencias de todas las columnas
+ *    X 1.3 - Los resultados no distinguen mayusculas de minusculas
+ * X2 - El boton add abre el formulario de introduccion de personal y agrega satisfactoriamente los datos
+ *    X 2.1 - Todos los campos son obligatorios, se demuestra que se marca el marco en rojo si se omite uno
+ *            y que el formulario no se envia.
  *      2.2 - Campo First Name:
  *         2.2.1 - Admite caracteres especiales y hasta un maximo de 25
  *      2.3 - Campo Last Name:
@@ -34,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *         2.5.1 - Solo admite numeros
  *         2.5.2 - Admite un maximo de 2 caracteres (0-99)
  *      2.6 - Campo Salary:
- *         2.6.1 - Solo admite numeros
+ *         2.6.1 - Solo admite numeros enteros
  *         2.6.2 - Admite un maximo de 10 caracteres
  *      2.7 - Campo Department:
  *         2.7.1 - Admite todos los caracteres alfanumericos y espacios
@@ -63,6 +67,7 @@ public class WebTablesTests extends BaseTest {
      *      a la columna First Name de la primer y unica fila
      * @throws IOException
      */
+
     @Test
     public void testSearchBoxCompleteCoincidence() throws IOException {
         MenuPage menuPage = homePage.clickInElementsCard();
@@ -72,8 +77,8 @@ public class WebTablesTests extends BaseTest {
         webTablesPage.writeInSearchBox(wordToSearch);
         webTablesPage.refreshRowsList();
         for(WebElement element:webTablesPage.getRowsList()){
-            if(!webTablesPage.getCellText(element,columns.FIRSTNAME).equals(" ")){
-                assertEquals("Alden",webTablesPage.getCellText(element,columns.FIRSTNAME));
+            if(!webTablesPage.getCellText(element, FIRSTNAME).equals(" ")){
+                assertEquals("Alden",webTablesPage.getCellText(element, FIRSTNAME));
             }
         }
     }
@@ -103,10 +108,10 @@ public class WebTablesTests extends BaseTest {
         webTablesPage.refreshRowsList();
         assertEquals(2,webTablesPage.getNumberOfCompleteRows());
         for(WebElement element:webTablesPage.getRowsList()){
-            if(!webTablesPage.getCellText(element,columns.FIRSTNAME).equals(" ")){
+            if(!webTablesPage.getCellText(element, FIRSTNAME).equals(" ")){
                 assertEquals(true,
-                        webTablesPage.getCellText(element,columns.FIRSTNAME).equals("Alden") ||
-                              webTablesPage.getCellText(element,columns.FIRSTNAME).equals("Kierra"));
+                        webTablesPage.getCellText(element, FIRSTNAME).equals("Alden") ||
+                              webTablesPage.getCellText(element, FIRSTNAME).equals("Kierra"));
             }
 
         }
@@ -130,7 +135,7 @@ public class WebTablesTests extends BaseTest {
      */
 
     @Test
-    public void testAddButton(){
+    public void testAddButton() throws InterruptedException {
         MenuPage menuPage = homePage.clickInElementsCard();
         var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
 
@@ -139,12 +144,77 @@ public class WebTablesTests extends BaseTest {
         assertEquals(4,webTablesPage.getNumberOfCompleteRows());
         boolean flagg=false;
         for(int i=0;i<webTablesPage.getNumberOfCompleteRows();i++)
-        {
-            if(webTablesPage.getCellText(webTablesPage.getRowsList().get(i),columns.FIRSTNAME).equals("Joaquin"))
+            if(webTablesPage.getCellText(webTablesPage.getRowsList().get(i), FIRSTNAME).equals("Joaquin"))
                 flagg=true;
-        }
-        assertTrue(flagg);
 
+        assertTrue(flagg);
     }
 
+    /**
+     * Prueba negativa:
+     *      Se comprueba que al no introducirse un campo en el formulario de ingreso
+     *      de datos, este se marque con una casilla roja y que el formulario no se envie
+     *      para su manipulacion.
+     * METODO DE PRUEBA:
+     *      Primero se obtiene el numero de boxes que posee el formulario. Para ello se
+     *      abre una unica vez en el proceso de prueba el formulario, se toma el numero de
+     *      campos y se guarda el dato numerico en una variable y se cierra el formulario.
+     *      Luego, de forma iterativa, se vuelve a abrir un formulario, se espera que cargue,
+     *      se rellenan todos los campos excepto uno y se da click a submit. Se
+     *      comprueba que el formulario sigue abierto (no se envió) y se constata que el
+     *      recuadro correspondiente al campo incompleto se marque con un cuadro rojo. Por ultimo se
+     *      cierra el formulario y el ciclo empieza de nuevo para analizar el siguiente campo.
+     *
+     * @throws InterruptedException La funcion checkRedFrame utiliza una espera de un segundo entre
+     *                              que se presiona submit y se constata el color del marco, es por eso
+     *                              que se espera la excepcion InterruptedException.
+     */
+
+    @Test
+    public void redFrameInIncompleteFields() throws InterruptedException {
+        MenuPage menuPage = homePage.clickInElementsCard();
+        var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
+        int numberOfBoxesInForm=webTablesPage.getNumberOfBoxesInForm();
+        System.out.println(numberOfBoxesInForm);
+        for(int i=0;i<numberOfBoxesInForm;i++) {
+
+            webTablesPage.clickAddButtonAndWaitFormLoad();
+            webTablesPage.eraseAllBoxes();
+            webTablesPage.manualInputGenerator("Joaquin","Grassi","28",
+                    "joaquin@example.com","10000","QA Automation",i,"");
+            assertEquals("Registration Form",webTablesPage.getFormTittle());
+            assertTrue(webTablesPage.checkRedFrame(columns.values()[i]));
+            //webTablesPage.eraseAllBoxes();
+            webTablesPage.clickCloseButton();
+        }
+    }
+
+
+    @Test
+    public void correctBehavoirOfFirstNameBox(){
+        MenuPage menuPage = homePage.clickInElementsCard();
+        var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
+        ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1);
+        ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2);
+        ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3);
+
+        webTablesPage.writeInSearchBox("Grassi");
+        for(int i=0;i<incorrectInputs.size();i++) {
+            String incorrectFirstName=incorrectInputs.get(i);
+
+
+            webTablesPage.manualInputGenerator(incorrectFirstName, "Grassi", "28", "joaquin.grassi@example.com",
+                    "10000", "QA Testing");
+            webTablesPage.refreshRowsList();
+            if(methods.get(i).equals("strLenComp")){
+                assertEquals(Integer.parseInt(expectedOutputs.get(0)),webTablesPage.getCellText(webTablesPage.getRowsList().get(i),FIRSTNAME ).length());
+            }
+            else if(methods.get(i).equals("strComp")){
+                assertTrue(webTablesPage.getCellText(webTablesPage.getRowsList().get(i),FIRSTNAME).contains(expectedOutputs.get(i)));
+            }
+            else if(methods.get(i).equals("numComp")){
+                assertEquals(Integer.parseInt(expectedOutputs.get(i)),Integer.parseInt(webTablesPage.getCellText(webTablesPage.getRowsList().get(i),FIRSTNAME)));
+            }
+        }
+    }
 }

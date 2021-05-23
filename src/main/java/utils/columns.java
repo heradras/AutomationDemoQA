@@ -1,3 +1,6 @@
+/**
+ * Contiene los nombres posibles de las columnas
+ */
 package utils;
 
 public enum columns {
