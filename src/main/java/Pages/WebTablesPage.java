@@ -5,6 +5,7 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -17,6 +18,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import static utils.columns.AGE;
 import static utils.columns.FIRSTNAME;
 
 public class WebTablesPage {
@@ -131,7 +133,7 @@ public class WebTablesPage {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println(box.getCssValue("border-color"));
+
         if(box.getCssValue("border-color").equals("rgb(220, 53, 69)")){
             return true;
         }
@@ -283,7 +285,6 @@ public class WebTablesPage {
     }
 
     public String getWritedBoxText(WebElement box){
-        clickInTitle();
         return box.getAttribute("value");
     }
 
@@ -440,8 +441,6 @@ public class WebTablesPage {
             var cell = row.getCell(cellIndex);
             var value = cell.getStringCellValue();
 
-            //System.out.println("Valor de la entrada es " + value);
-            //System.out.println(cell.getCellType().toString());
             list.add(value);
             iRow++;
             row = sheet.getRow(iRow);
@@ -467,6 +466,63 @@ public class WebTablesPage {
 
         }
     }
+
+
+
+
+
+
+    public boolean getInFormContext(){
+        try{
+            getFormTittle();
+            return true;
+        }catch (NoSuchElementException e){return false;}
+    }
+
+    public boolean determineTest(String expected, String method,String clickInSubmitNeeded,String checkScenario,columns col){
+
+        if(clickInSubmitNeeded.toLowerCase().equals("yes")){
+            clickInSubmitAndWait(2000);
+        }
+
+        String writed=null;
+
+        if(checkScenario.toLowerCase().equals("form")&&getInFormContext()){
+            writed=getWritedBoxText(getBox(col));
+            return testType(method,expected,writed,col);
+        }
+        else if(checkScenario.toLowerCase().equals("tableweb")&&!getInFormContext()){
+            refreshRowsList();
+
+            writed=getCellText(getRowsList().get(0),col);
+            return testType(method,expected,writed,col);
+        }
+        else if(checkScenario.toLowerCase().equals("form")&&!getInFormContext()){
+            return false;
+        }
+        else{
+            return false;
+
+        }
+
+
+
+    }
+
+    public boolean testType(String method,String expected, String var,columns col){
+        switch(method){
+            case "strLenComp":  int varLength=var.length();
+                                return Integer.parseInt(expected)==varLength;
+            case "strComp":     return expected.equals(var);
+            case "checkRedFrame":return checkRedFrame(col);
+            case "strCont":     return var.contains(expected);
+            default: System.exit(1);return false;
+        }
+
+    }
+
+
+
 
 
 }

@@ -37,10 +37,11 @@ import static utils.columns.*;
  *         2.4.3 - El campo admite multiples puntos despues de la arroba pero no como final de cadena
  *         2.4.4 - El campo no posee limite de caracteres
  *         2.4.5 - No se admite mas de una arroba
- *      2.5 - Campo Age:
- *         2.5.1 - Solo admite numeros
- *         2.5.2 - Admite un maximo de 2 caracteres (0-99)
- *         2.5.3 - Admite edad 0
+ *    X 2.5 - Campo Age:
+ *       X 2.5.1 - Solo admite numeros
+ *       X 2.5.2 - Admite un maximo de 2 caracteres (0-99)
+ *       X 2.5.3 - Admite edad 0
+ *       X 2.5.4 - Admite edad 00
  *      2.6 - Campo Salary:
  *         2.6.1 - Solo admite numeros enteros
  *         2.6.2 - Admite un maximo de 10 caracteres
@@ -180,7 +181,7 @@ public class WebTablesTests extends BaseTest {
         MenuPage menuPage = homePage.clickInElementsCard();
         var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
         int numberOfBoxesInForm=webTablesPage.getNumberOfBoxesInForm();
-        System.out.println(numberOfBoxesInForm);
+
         for(int i=0;i<numberOfBoxesInForm;i++) {
 
             webTablesPage.clickAddButtonAndWaitFormLoad();
@@ -198,70 +199,80 @@ public class WebTablesTests extends BaseTest {
 
     @Test
     public void correctBehavoirOfFirstNameBox(){
-        String pathToTestsFile="D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\incorrectInputsFirstName.xlsx";
+        driver.manage().window().maximize();
+        String pathToTestsFile="D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsFirstName.xlsx";
         MenuPage menuPage = homePage.clickInElementsCard();
         var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
         ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
         ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2,pathToTestsFile);
         ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3,pathToTestsFile);
+        ArrayList<String> checkScenario = webTablesPage.cloneColumnElementsInList(1,4,pathToTestsFile);
+        ArrayList<String> clickSubmitNeeded = webTablesPage.cloneColumnElementsInList(1,5,pathToTestsFile);
 
 
-        webTablesPage.clickAddButtonAndWaitFormLoad();
-        webTablesPage.manualInputGenerator("", "Grassi", "29", "joaquin.grassi@example.com",
-                "10000", "QA Testing");
         for(int i=0;i<incorrectInputs.size();i++) {
-            String incorrectInput=incorrectInputs.get(i);
 
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
+                webTablesPage.clickAddButtonAndWaitFormLoad();
+            }
+
+
+            String incorrectInput=incorrectInputs.get(i);
+            webTablesPage.manualInputGenerator("", "Grassi", "28", "joaquin.grassi@example.com",
+                    "10000", "QA Testing");
             webTablesPage.writeInFirstName(incorrectInput);
 
+            assertTrue(
+                    webTablesPage.determineTest(expectedOutputs.get(i),
+                            methods.get(i),
+                            clickSubmitNeeded.get(i),
+                            checkScenario.get(i),
+                            FIRSTNAME)
+            );
 
-            if(methods.get(i).equals("strLenComp")){
-                assertEquals(Integer.parseInt(expectedOutputs.get(i)),webTablesPage.getWritedBoxText(webTablesPage.getBox(FIRSTNAME)).length());
-            }
-            else if(methods.get(i).equals("strComp")){
-                assertTrue(webTablesPage.getWritedBoxText(webTablesPage.getBox(FIRSTNAME)).contains(expectedOutputs.get(i)));
-            }
-            else if(methods.get(i).equals("numComp")){
-                assertEquals(Integer.parseInt(expectedOutputs.get(i)),Integer.parseInt(webTablesPage.getCellText(webTablesPage.getRowsList().get(i),FIRSTNAME)));
-            }
         }
     }
 
     @Test
     public void correctBehavoirOflastNameBox(){
-        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\incorrectInputsLastName.xlsx";
+        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsLastName.xlsx";
         MenuPage menuPage = homePage.clickInElementsCard();
         var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
         ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
         ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2,pathToTestsFile);
         ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3,pathToTestsFile);
+        ArrayList<String> checkScenario = webTablesPage.cloneColumnElementsInList(1,4,pathToTestsFile);
+        ArrayList<String> clickSubmitNeeded = webTablesPage.cloneColumnElementsInList(1,5,pathToTestsFile);
 
 
-        webTablesPage.clickAddButtonAndWaitFormLoad();
-        webTablesPage.manualInputGenerator("Joaquin", "", "29", "joaquin.grassi@example.com",
-                "10000", "QA Testing");
         for(int i=0;i<incorrectInputs.size();i++) {
-            String incorrectInput=incorrectInputs.get(i);
 
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
+                webTablesPage.clickAddButtonAndWaitFormLoad();
+            }
+
+
+            String incorrectInput=incorrectInputs.get(i);
+            webTablesPage.manualInputGenerator("Joaquin", "", "28", "joaquin.grassi@example.com",
+                    "10000", "QA Testing");
             webTablesPage.writeInLastName(incorrectInput);
 
-
-            if(methods.get(i).equals("strLenComp")){
-                assertEquals(Integer.parseInt(expectedOutputs.get(i)),webTablesPage.getWritedBoxText(webTablesPage.getBox(LASTNAME)).length());
-            }
-            else if(methods.get(i).equals("strComp")){
-                assertTrue(webTablesPage.getWritedBoxText(webTablesPage.getBox(LASTNAME)).contains(expectedOutputs.get(i)));
-            }
-            else if(methods.get(i).equals("numComp")){
-                assertEquals(Integer.parseInt(expectedOutputs.get(i)),Integer.parseInt(webTablesPage.getCellText(webTablesPage.getRowsList().get(i),LASTNAME)));
-            }
+            assertTrue(
+                    webTablesPage.determineTest(expectedOutputs.get(i),
+                            methods.get(i),
+                            clickSubmitNeeded.get(i),
+                            checkScenario.get(i),
+                            LASTNAME)
+            );
         }
     }
 
     @Test
     public void correctBehavoirOfAgeBox(){
         driver.manage().window().maximize();
-        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\incorrectInputsAge.xlsx";
+        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsAge.xlsx";
         MenuPage menuPage = homePage.clickInElementsCard();
         var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
         ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
@@ -272,11 +283,11 @@ public class WebTablesTests extends BaseTest {
 
 
 
+
         for(int i=0;i<incorrectInputs.size();i++) {
-            webTablesPage.eraseAllRows();
-            try{
-                webTablesPage.getFormTittle();
-            }catch (NoSuchElementException e){
+
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
                 webTablesPage.clickAddButtonAndWaitFormLoad();
             }
 
@@ -286,47 +297,94 @@ public class WebTablesTests extends BaseTest {
                     "10000", "QA Testing");
             webTablesPage.writeInAge(incorrectInput);
 
+            assertTrue(
+                webTablesPage.determineTest(expectedOutputs.get(i),
+                                            methods.get(i),
+                                            clickSubmitNeeded.get(i),
+                                            checkScenario.get(i),
+                                            AGE)
+            );
 
-
-            if(methods.get(i).equals("strLenComp")){
-                if(clickSubmitNeeded.get(i).toLowerCase().equals("yes")){
-                    webTablesPage.clickInSubmitAndWait(2000);
-                    webTablesPage.refreshRowsList();
-                    assertEquals(Integer.parseInt(expectedOutputs.get(i)),webTablesPage.getCellText(webTablesPage.getRowsList().get(0),AGE).length());
-                }
-                else {
-                    assertEquals(Integer.parseInt(expectedOutputs.get(i)), webTablesPage.getWritedBoxText(webTablesPage.getBox(AGE)).length());
-                }
-            }
-            else if(methods.get(i).equals("strComp")){
-                if(clickSubmitNeeded.get(i).toLowerCase().equals("yes")){
-                    if(checkScenario.get(i).toLowerCase().equals("form")){
-                        webTablesPage.clickInSubmitAndWait(2000);
-                        assertTrue(webTablesPage.getWritedBoxText(webTablesPage.getBox(AGE)).contains(expectedOutputs.get(i)));
-                    }
-                    else if(checkScenario.get(i).toLowerCase().equals("tableweb")){
-                        webTablesPage.clickInSubmitAndWait(2000);
-                        assertTrue(webTablesPage.getCellText(webTablesPage.getCompleteRowsList().get(0),AGE).contains(expectedOutputs.get(i)));
-                    }
-
-
-                }
-                else{
-                    assertTrue(webTablesPage.getWritedBoxText(webTablesPage.getBox(AGE)).contains(expectedOutputs.get(i)));
-                }
-
-            }
-            else if(methods.get(i).equals("checkRedFrame")){
-                if(clickSubmitNeeded.get(i).toLowerCase().equals("yes")){
-                    webTablesPage.clickInSubmitAndWait(2000);
-                    assertTrue(webTablesPage.checkRedFrame(AGE));
-                }
-                else
-                {
-                    assertTrue(webTablesPage.checkRedFrame(AGE));
-                }
-
-            }
         }
     }
+
+    @Test
+    public void correctBehavoirOfSalaryBox(){
+        driver.manage().window().maximize();
+        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsSalary.xlsx";
+        MenuPage menuPage = homePage.clickInElementsCard();
+        var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
+        ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
+        ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2,pathToTestsFile);
+        ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3,pathToTestsFile);
+        ArrayList<String> checkScenario = webTablesPage.cloneColumnElementsInList(1,4,pathToTestsFile);
+        ArrayList<String> clickSubmitNeeded = webTablesPage.cloneColumnElementsInList(1,5,pathToTestsFile);
+
+
+
+
+        for(int i=0;i<incorrectInputs.size();i++) {
+
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
+                webTablesPage.clickAddButtonAndWaitFormLoad();
+            }
+
+
+            String incorrectInput=incorrectInputs.get(i);
+            webTablesPage.manualInputGenerator("Joaquin", "Grassi", "28", "joaquin.grassi@example.com",
+                    "", "QA Testing");
+            webTablesPage.writeInSalary(incorrectInput);
+
+            assertTrue(
+                    webTablesPage.determineTest(expectedOutputs.get(i),
+                            methods.get(i),
+                            clickSubmitNeeded.get(i),
+                            checkScenario.get(i),
+                            SALARY)
+            );
+
+        }
+    }
+
+
+    @Test
+    public void correctBehavoirOfDepartmentBox(){
+        driver.manage().window().maximize();
+        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsDepartment.xlsx";
+        MenuPage menuPage = homePage.clickInElementsCard();
+        var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
+        ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
+        ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2,pathToTestsFile);
+        ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3,pathToTestsFile);
+        ArrayList<String> checkScenario = webTablesPage.cloneColumnElementsInList(1,4,pathToTestsFile);
+        ArrayList<String> clickSubmitNeeded = webTablesPage.cloneColumnElementsInList(1,5,pathToTestsFile);
+
+
+
+
+        for(int i=0;i<incorrectInputs.size();i++) {
+
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
+                webTablesPage.clickAddButtonAndWaitFormLoad();
+            }
+
+
+            String incorrectInput=incorrectInputs.get(i);
+            webTablesPage.manualInputGenerator("Joaquin", "Grassi", "28", "joaquin.grassi@example.com",
+                    "10000", "");
+            webTablesPage.writeInDepartment(incorrectInput);
+
+            assertTrue(
+                    webTablesPage.determineTest(expectedOutputs.get(i),
+                            methods.get(i),
+                            clickSubmitNeeded.get(i),
+                            checkScenario.get(i),
+                            DEPARTMENT)
+            );
+
+        }
+    }
+
 }
