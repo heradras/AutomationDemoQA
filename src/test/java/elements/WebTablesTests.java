@@ -31,23 +31,23 @@ import static utils.columns.*;
  *       X 2.2.1 - Admite caracteres especiales y hasta un maximo de 25
  *    X 2.3 - Campo Last Name:
  *       X 2.3.1 - Admite caracteres especiales y hasta un maximo de 25
- *      2.4 - Campo Email:
- *         2.4.1 - Es obligatoria, en el campo Email, la introduccion de una arroba y un punto
- *         2.4.2 - El campo no admite caracteres especiales excpetuando el punto "."
- *         2.4.3 - El campo admite multiples puntos despues de la arroba pero no como final de cadena
- *         2.4.4 - El campo no posee limite de caracteres
- *         2.4.5 - No se admite mas de una arroba
+ *    X 2.4 - Campo Email:
+ *       X 2.4.1 - Es obligatoria, en el campo Email, la introduccion de una arroba y un punto
+ *       X 2.4.2 - El campo no admite caracteres especiales excpetuando el punto "."
+ *       X 2.4.3 - El campo admite multiples puntos despues de la arroba pero no como final de cadena
+ *       X 2.4.4 - El campo no posee limite de caracteres
+ *       X 2.4.5 - No se admite mas de una arroba
  *    X 2.5 - Campo Age:
  *       X 2.5.1 - Solo admite numeros
  *       X 2.5.2 - Admite un maximo de 2 caracteres (0-99)
  *       X 2.5.3 - Admite edad 0
  *       X 2.5.4 - Admite edad 00
- *      2.6 - Campo Salary:
- *         2.6.1 - Solo admite numeros enteros
- *         2.6.2 - Admite un maximo de 10 caracteres
- *      2.7 - Campo Department:
- *         2.7.1 - Admite todos los caracteres alfanumericos y espacios
- *         2.7.2 - Admite un maximo de 25 caracteres
+ *    X 2.6 - Campo Salary:
+ *       X 2.6.1 - Solo admite numeros enteros
+ *       X 2.6.2 - Admite un maximo de 10 caracteres
+ *    X 2.7 - Campo Department:
+ *       X 2.7.1 - Admite todos los caracteres alfanumericos y espacios
+ *       X 2.7.2 - Admite un maximo de 25 caracteres
  *  3 - Clickear sobre los nombres de las columnas, en el area de datos, ordena la columna de forma ascendente
  *  4 - Volver a clickear sobre los nombres de las columnas reordena los datos de forma descendente
  *  5 - El icono de lapiz (Edit) abre el registration form con los datos introducidos para ser modificados
@@ -222,7 +222,7 @@ public class WebTablesTests extends BaseTest {
             webTablesPage.manualInputGenerator("", "Grassi", "28", "joaquin.grassi@example.com",
                     "10000", "QA Testing");
             webTablesPage.writeInFirstName(incorrectInput);
-
+            System.out.println(incorrectInput);
             assertTrue(
                     webTablesPage.determineTest(expectedOutputs.get(i),
                             methods.get(i),
@@ -382,6 +382,45 @@ public class WebTablesTests extends BaseTest {
                             clickSubmitNeeded.get(i),
                             checkScenario.get(i),
                             DEPARTMENT)
+            );
+
+        }
+    }
+
+    @Test
+    public void correctBehavoirOfEmailBox(){
+        driver.manage().window().maximize();
+        String pathToTestsFile = "D:\\Software testing\\LearningPath\\practicaQADemo\\resources\\webTables\\testInputsEmail.xlsx";
+        MenuPage menuPage = homePage.clickInElementsCard();
+        var webTablesPage = new DropDownElementsPage(driver).clickInWebTables();
+        ArrayList<String> incorrectInputs = webTablesPage.cloneColumnElementsInList(1,1,pathToTestsFile);
+        ArrayList<String> expectedOutputs = webTablesPage.cloneColumnElementsInList(1,2,pathToTestsFile);
+        ArrayList<String> methods = webTablesPage.cloneColumnElementsInList(1,3,pathToTestsFile);
+        ArrayList<String> checkScenario = webTablesPage.cloneColumnElementsInList(1,4,pathToTestsFile);
+        ArrayList<String> clickSubmitNeeded = webTablesPage.cloneColumnElementsInList(1,5,pathToTestsFile);
+
+
+
+
+        for(int i=0;i<incorrectInputs.size();i++) {
+
+            if(!webTablesPage.getInFormContext()){
+                webTablesPage.eraseAllRows();
+                webTablesPage.clickAddButtonAndWaitFormLoad();
+            }
+
+
+            String incorrectInput=incorrectInputs.get(i);
+            webTablesPage.manualInputGenerator("Joaquin", "Grassi", "28", "",
+                    "10000", "QA Automation");
+            webTablesPage.writeInEmail(incorrectInput);
+
+            assertTrue(
+                    webTablesPage.determineTest(expectedOutputs.get(i),
+                            methods.get(i),
+                            clickSubmitNeeded.get(i),
+                            checkScenario.get(i),
+                            EMAIL)
             );
 
         }

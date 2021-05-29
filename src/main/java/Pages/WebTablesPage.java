@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.xmlbeans.impl.xb.xsdschema.PatternDocument;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
@@ -17,6 +18,7 @@ import utils.domController;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static utils.columns.AGE;
 import static utils.columns.FIRSTNAME;
@@ -133,6 +135,7 @@ public class WebTablesPage {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        System.out.println("color: "+box.getCssValue("border-color"));
 
         if(box.getCssValue("border-color").equals("rgb(220, 53, 69)")){
             return true;
@@ -228,12 +231,15 @@ public class WebTablesPage {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+
+        /**/
     }
 
     public void clickAddButtonAndWaitFormLoad(){
         domController.scrollToItem(driver,driver.findElement(addButton));
         driver.findElement(addButton).click();
-        WebDriverWait wait = new WebDriverWait(driver,5);
+        WebDriverWait wait = new WebDriverWait(driver,20);
         wait.until(ExpectedConditions.elementToBeClickable(departmentBox));
     }
 
@@ -251,6 +257,8 @@ public class WebTablesPage {
         for(int i =0;i<rows;i++){
             eraseRow(getRowsList().get(0));
         }
+        WebDriverWait wait = new WebDriverWait(driver,20);
+        wait.until(ExpectedConditions.textMatches(this.rows, Pattern.compile(" ")));
     }
 
     public List<WebElement> getCompleteRowsList(){
@@ -479,30 +487,23 @@ public class WebTablesPage {
         }catch (NoSuchElementException e){return false;}
     }
 
-    public boolean determineTest(String expected, String method,String clickInSubmitNeeded,String checkScenario,columns col){
-
-        if(clickInSubmitNeeded.toLowerCase().equals("yes")){
-            clickInSubmitAndWait(2000);
-        }
-
+    public boolean determineTest(String expected, String method,String clickInSubmitNeeded,String checkScenario, columns col){
         String writed=null;
-
-        if(checkScenario.toLowerCase().equals("form")&&getInFormContext()){
-            writed=getWritedBoxText(getBox(col));
-            return testType(method,expected,writed,col);
-        }
-        else if(checkScenario.toLowerCase().equals("tableweb")&&!getInFormContext()){
-            refreshRowsList();
-
-            writed=getCellText(getRowsList().get(0),col);
-            return testType(method,expected,writed,col);
-        }
-        else if(checkScenario.toLowerCase().equals("form")&&!getInFormContext()){
-            return false;
+        if(clickInSubmitNeeded.toLowerCase().equals("yes")){
+            clickInSubmitAndWait(1000);
+            if(checkScenario.toLowerCase().equals("form")){
+                writed=getWritedBoxText(getBox(col));
+                return testType(method,expected,writed,col);
+            }
+            else{
+                refreshRowsList();
+                writed=getCellText(getRowsList().get(0),col);
+                return testType(method,expected,writed,col);
+            }
         }
         else{
-            return false;
-
+            writed=getWritedBoxText(getBox(col));
+            return testType(method,expected,writed,col);
         }
 
 
@@ -520,9 +521,4 @@ public class WebTablesPage {
         }
 
     }
-
-
-
-
-
 }
